@@ -6,9 +6,29 @@ from wildlife_datasets import datasets
 from wildlife_tools.data import WildlifeDataset
 from wildlife_tools.similarity import CosineSimilarity
 from wildlife_tools.features import DeepFeatures
+from typing import Optional, List, Tuple
 
-def get_normalized_features(file_name, dataset=None, extractor=None, normalize=True):
-    if os.path.exists(file_name):
+def get_normalized_features(
+        file_name: str,
+        dataset: Optional[WildlifeDataset] = None,
+        extractor: DeepFeatures[DeepFeatures] = None,
+        normalize: bool = True,
+        force_compute: bool = False,
+        ) -> np.ndarray:
+    """Loads already computed features from `file_name` or computes and saves them.
+
+    Args:
+        file_name (str): Filename of the saved features.
+        dataset (Optional[WildlifeDataset], optional): Dataset for which compute the features.
+        extractor (Optional[DeepFeatures], optional): Extractor to extract the features.
+        normalize (bool, optional): Whether the features should be normalized to l2-norm one.
+        force_compute (bool, optional): Whether the file should be overwritten if it exists.
+
+    Returns:
+        Computed features of size n_dataset*n_features.
+    """
+
+    if os.path.exists(file_name) and not force_compute:
         features = np.load(file_name)
     else:
         features = extractor(dataset)
@@ -20,38 +40,74 @@ def get_normalized_features(file_name, dataset=None, extractor=None, normalize=T
             features[i] /= np.linalg.norm(features[i])
     return features
 
-def get_extractor(model_name='hf-hub:BVRA/MegaDescriptor-T-224', **kwargs):
+def get_extractor(
+        model_name: str = 'hf-hub:BVRA/MegaDescriptor-T-224',
+        **kwargs
+        ) -> DeepFeatures:
+    """Loads an extractor via `timm.create_model`.
+
+    Args:
+        model_name (str, optional): Name of the model.
+
+    Returns:
+        Loaded extractor.
+    """
+
     model = timm.create_model(model_name, num_classes=0, pretrained=True)
     return DeepFeatures(model, **kwargs)
 
-def compute_predictions_disjoint(features, k=4, batch_size=1000):
-    n_query = len(features)
-    n_chunks = int(np.ceil(n_query / batch_size))
-    chunks = np.array_split(range(n_query), n_chunks)
+def compute_predictions(
+        features_query: np.ndarray,
+        features_database: np.ndarray,
+        ignore: Optional[List[List[int]]] = None,
+        k: int = 4,
+        batch_size: int = 1000
+        ) -> Tuple[np.ndarray, np.ndarray]:
+    """Computes a closest match in the database for each vector in the query set.
 
-    matcher = CosineSimilarity()
-    idx_true = np.array(range(n_query))    
-    idx_pred = np.zeros((n_query, k), dtype=np.int32)
-    for chunk in chunks:
-        similarity = matcher(query=features[chunk], database=features)['cosine']
-        idx_x = np.arange(len(chunk))
-        idx_y = np.arange(chunk[0], chunk[0]+len(chunk))
-        similarity[idx_x, idx_y] = -1        
-        idx_pred[chunk,:] = (-similarity).argsort(axis=-1)[:, :k]
-    return idx_true, idx_pred
+    Args:
+        features_query (np.ndarray): Query features of size n_query*n_feature. 
+        features_database (np.ndarray): Database features of size n_database*n_feature
+        ignore (Optional[List[List[int]]], optional): `ignore[i]` is a list of indices
+            in the database ignores for i-th query.
+        k (int, optional): Returned number of predictions.
+        batch_size (int, optional): Size of the computaiton batch.
 
-def compute_predictions_closed(features_query, features_database, k=4, batch_size=1000):
+    Returns:
+        Vector of size (n_query,) and array of size (n_query,k). The latter are indices
+            in the database for the closest matches (with ignored `ignore` indices)
+    """
+
+    # Create batch chunks
     n_query = len(features_query)
     n_chunks = int(np.ceil(n_query / batch_size))
     chunks = np.array_split(range(n_query), n_chunks)
-
+    # If ignore is not provided, initialize as empty
+    if ignore is None:
+        ignore = [[] for _ in range(n_query)]
+    
     matcher = CosineSimilarity()
-    idx_true = np.array(range(n_query))    
+    idx_true = np.array(range(n_query))
     idx_pred = np.zeros((n_query, k), dtype=np.int32)
     for chunk in chunks:
+        # Compute the cosine similarity between the query chunk and the database
         similarity = matcher(query=features_query[chunk], database=features_database)['cosine']
+        # Set -infinity for ignored indices
+        for i in range(len(chunk)):
+            similarity[i, ignore[chunk[i]]] = -np.inf
+        # Find the closest matches (k highest values)
         idx_pred[chunk,:] = (-similarity).argsort(axis=-1)[:, :k]
     return idx_true, idx_pred
+
+def compute_predictions_disjoint(features, ignore=None, **kwargs):
+    if ignore is None:
+        ignore = [[] for _ in range(len(features))]
+    for i in range(len(ignore)):
+        ignore[i].append(i)
+    return compute_predictions(features, features, ignore=ignore, **kwargs)
+
+def compute_predictions_closed(features_query, features_database, ignore=None, **kwargs):
+    return compute_predictions(features_query, features_database, ignore=ignore, **kwargs)
 
 class WD(WildlifeDataset):
     def plot_grid(self, transform=None, **kwargs):
