@@ -11,7 +11,7 @@ from typing import Optional, List, Tuple
 def get_normalized_features(
         file_name: str,
         dataset: Optional[WildlifeDataset] = None,
-        extractor: DeepFeatures[DeepFeatures] = None,
+        extractor: Optional[DeepFeatures] = None,
         normalize: bool = True,
         force_compute: bool = False,
         ) -> np.ndarray:
@@ -142,7 +142,7 @@ def compute_predictions_closed(
         Vector of size (n_query,) and array of size (n_query,k). The latter are indices
             in the database for the closest matches (with ignored `ignore` indices)
     """
-    
+
     return compute_predictions(features_query, features_database, ignore=ignore, **kwargs)
 
 class WD(WildlifeDataset):
