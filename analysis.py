@@ -6,7 +6,7 @@ class Analysis():
     def __init__(self):
         # TODO: change names to something normal
         self.n_sides = len(self.sides)
-        self.names1 = ['database-database', 'query-query', 'database-query']
+        self.names_split = ['database-database', 'query-query', 'database-query']
         # TODO: add check for sides
 
     def get_split(self, *args, **kwargs):
@@ -44,11 +44,11 @@ class Analysis():
 
     def initialite_results_split_similarity(self):
         results = {}
-        for name1 in self.names1:
+        for name1 in self.names_split:
             results1 = {}
             for diff in range(self.n_sides):
                 results2 = {}
-                for name2 in self.names2:
+                for name2 in self.names_categories:
                     results2[name2] = []
                 results1[diff] = results2
             results[name1] = results1
@@ -73,7 +73,7 @@ class Analysis():
         
         data = self.compute_data_split_similarity(df)
         results = self.initialite_results_split_similarity()
-        for idx1, idx2, name in zip((idx_database, idx_query, idx_database), (idx_database, idx_query, idx_query), self.names1):
+        for idx1, idx2, name in zip((idx_database, idx_query, idx_database), (idx_database, idx_query, idx_query), self.names_split):
             array_equal = np.array_equal(idx1, idx2)
             for i_index, i in enumerate(idx1):
                 idx2_range = idx2[i_index+1:] if array_equal else idx2
@@ -87,7 +87,7 @@ class Analysis_SarahZelvy(Analysis):
     def __init__(self):
         self.sides = {'left': 0, 'right': 1}
         self.diff_to_matches = {0: 'match same side', 1: 'match diff side'}
-        self.names2 = ['same ind', 'diff ind']
+        self.names_categories = ['same ind', 'diff ind']
         super().__init__()
 
     def get_split(self, df, daytime='all'):
@@ -148,7 +148,7 @@ class Analysis_SeaTurtleIDHeads(Analysis_WildlifeDataset):
     def __init__(self):
         self.sides = {'left': 0, 'topleft': 1, 'top': 2, 'topright': 3, 'right': 4}
         self.diff_to_matches = {0: 'match diff = 0', 1: 'match diff = 1', 2: 'match diff = 2', 3: 'match diff = 3', 4: 'match diff = 4'}
-        self.names2 = ['same ind - same day', 'same ind - same setup', 'same ind - diff setup', 'diff ind - same setup', 'diff ind - diff setup']
+        self.names_categories = ['same ind - same day', 'same ind - same setup', 'same ind - diff setup', 'diff ind - same setup', 'diff ind - diff setup']
         super().__init__()
         
     def get_setup_id(self, date):
@@ -183,5 +183,5 @@ class Analysis_ZindiTurtleRecall(Analysis_WildlifeDataset):
     def __init__(self):
         self.sides = {'left': 0, 'top': 1, 'right': 2}
         self.diff_to_matches = {0: 'match diff = 0', 1: 'match diff = 1', 2: 'match diff = 2'}
-        self.names2 = ['same ind', 'diff ind']
+        self.names_categories = ['same ind', 'diff ind']
         super().__init__()
