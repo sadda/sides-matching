@@ -182,7 +182,19 @@ class Analysis_SeaTurtleIDHeads(Analysis_WildlifeDataset):
                 return 'diff ind - diff setup'
 
 class Analysis_SeaTurtleID2022(Analysis_SeaTurtleIDHeads):
-    pass
+    def get_split(self, df, df_old, idx_ignore=None):
+        if idx_ignore is None:
+            idx_ignore = np.zeros(len(df), dtype=bool)
+        assert len(df) == len(idx_ignore)
+
+        new_identities = set(df['identity']) - set(df_old['identity'])
+        idx_query = []
+        for i, (_, df_row) in enumerate(df.iterrows()):
+            if df_row['identity'] in new_identities and i not in idx_ignore:
+                idx_query.append(i)
+        idx_query = np.array(idx_query)
+        idx_database = []
+        return idx_database, idx_query
 
 class Analysis_ZindiTurtleRecall(Analysis_WildlifeDataset):
     def __init__(self):
