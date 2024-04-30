@@ -4,10 +4,18 @@ import pandas as pd
 
 class Analysis():
     def __init__(self):
-        # TODO: change names to something normal
         self.n_sides = len(self.sides)
         self.names_split = ['database-database', 'query-query', 'database-query']
-        # TODO: add check for sides
+        self.check_data()
+
+    def check_data(self):
+        array1 = range(self.n_sides)
+        array2 = np.sort(list(self.sides.values()))
+        array3 = np.sort(list(self.diff_to_matches.keys()))
+        if not np.array_equal(array1, array2):
+            raise Exception('Values in self.sides must be 0..n')
+        if not np.array_equal(array1, array3):
+            raise Exception('Values in self.sides must be 0..n')
 
     def get_split(self, *args, **kwargs):
         raise NotImplementedError('Must be implemented by subclasses')
