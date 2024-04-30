@@ -102,7 +102,6 @@ class Analysis_WildlifeDataset(Analysis):
             self,
             df,
             dataset_name,
-            empty_database=False,
             idx_ignore=None,
             ):
         
@@ -131,17 +130,14 @@ class Analysis_WildlifeDataset(Analysis):
         # Extract query and database indices
         idx_train = np.array([x in train_names for x in df_names])
         idx_query = np.where((~idx_ignore) * (~idx_train))[0]
-        if empty_database:
-            idx_database = []
-        else:
-            idx_database = np.where((~idx_ignore) * idx_train)[0]
+        idx_database = np.where((~idx_ignore) * idx_train)[0]
         return idx_database, idx_query
 
-    def get_split(self, df, idx_ignore=None, **kwargs):
+    def get_split(self, df, idx_ignore=None):
         if idx_ignore is None:
             idx_ignore = np.array(df['identity'] == 'unknown')
         name = self.__class__.__name__.split('_')[-1]
-        return self.get_split_general(df, name, idx_ignore=idx_ignore, **kwargs)
+        return self.get_split_general(df, name, idx_ignore=idx_ignore)
 
 class Analysis_HyenaID2022(Analysis_WildlifeDataset):
     def __init__(self):
