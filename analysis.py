@@ -190,7 +190,7 @@ class Analysis_SeaTurtleID2022(Analysis_SeaTurtleIDHeads):
         new_identities = set(df['identity']) - set(df_old['identity'])
         idx_query = []
         for i, (_, df_row) in enumerate(df.iterrows()):
-            if df_row['identity'] in new_identities and i not in idx_ignore:
+            if df_row['identity'] in new_identities and not idx_ignore[i]:
                 idx_query.append(i)
         idx_query = np.array(idx_query)
         idx_database = []
