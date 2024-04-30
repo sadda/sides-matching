@@ -89,12 +89,13 @@ class Analysis_SarahZelvy(Analysis):
         self.names_categories = ['same ind', 'diff ind']
         super().__init__()
 
-    def get_split(self, df, daytime='all'):
+    def get_split(self, df, idx_ignore=None):
+        if idx_ignore is None:
+            idx_ignore = np.zeros(len(df), dtype=bool)
+        assert len(df) == len(idx_ignore)
+ 
         idx_database = []
-        if daytime in ['day', 'night']:
-            idx_query = np.where(df['daytime'] == daytime)[0]
-        else:
-            idx_query = np.arange(len(df))
+        idx_query = np.where(~idx_ignore)[0]
         return idx_database, idx_query
 
 class Analysis_WildlifeDataset(Analysis):
