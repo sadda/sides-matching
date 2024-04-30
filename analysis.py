@@ -51,17 +51,8 @@ class Analysis():
         return matches
 
     def initialite_results_split_similarity(self):
-        results = {}
-        for name1 in self.names_split:
-            results1 = {}
-            for diff in range(self.n_sides):
-                results2 = {}
-                for name2 in self.names_categories:
-                    results2[name2] = []
-                results1[diff] = results2
-            results[name1] = results1
-        return results
-
+        return {i: {j: {k: [] for k in self.names_categories} for j in range(self.n_sides)} for i in self.names_split}
+    
     def compute_data_split_similarity(self, df):
         identity = df['identity'].to_numpy()
         orientation = df['orientation'].apply(lambda x: self.sides[x] if x in self.sides else np.nan).to_numpy()
@@ -74,18 +65,18 @@ class Analysis():
             return 'diff ind'
 
     def split_similarity_matrix(self, df, similarity, idx_database, idx_query):
-        if len(set(idx_database).intersection(set(idx_query))):
+        if len(set(idx_database).intersection(set(idx_query))) > 0:
             raise Exception('idx must be disjoint')
         idx_database = np.sort(np.array(idx_database))
         idx_query = np.sort(np.array(idx_query))
         
         data = self.compute_data_split_similarity(df)
         results = self.initialite_results_split_similarity()
-        for idx1, idx2, name in zip((idx_database, idx_query, idx_database), (idx_database, idx_query, idx_query), self.names_split):
-            array_equal = np.array_equal(idx1, idx2)
-            for i_index, i in enumerate(idx1):
-                idx2_range = idx2[i_index+1:] if array_equal else idx2
-                for j in idx2_range:
+        for idx, jdx, name in zip((idx_database, idx_query, idx_database), (idx_database, idx_query, idx_query), self.names_split):
+            array_equal = np.array_equal(idx, jdx)
+            for i_index, i in enumerate(idx):
+                jdx_range = jdx[i_index+1:] if array_equal else jdx
+                for j in jdx_range:
                     diff = abs(data['orientation'][i] - data['orientation'][j])
                     index = self.compute_index_split_similarity(data, i, j)
                     results[name][diff][index].append(similarity[i,j])
