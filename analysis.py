@@ -20,6 +20,12 @@ class Analysis():
     def get_split(self, *args, **kwargs):
         raise NotImplementedError('Must be implemented by subclasses')
 
+    def get_split_initialize_idx_ignore(self, df, idx_ignore=None):        
+        if idx_ignore is None:
+            idx_ignore = np.zeros(len(df), dtype=bool)
+        assert len(df) == len(idx_ignore)
+        return idx_ignore
+
     def get_matches(
             self,
             y_true,
@@ -90,10 +96,7 @@ class Analysis_SarahZelvy(Analysis):
         super().__init__()
 
     def get_split(self, df, idx_ignore=None):
-        if idx_ignore is None:
-            idx_ignore = np.zeros(len(df), dtype=bool)
-        assert len(df) == len(idx_ignore)
- 
+        idx_ignore = self.get_split_initialize_idx_ignore(df, idx_ignore=idx_ignore)
         idx_database = []
         idx_query = np.where(~idx_ignore)[0]
         return idx_database, idx_query
@@ -106,10 +109,7 @@ class Analysis_WildlifeDataset(Analysis):
             idx_ignore=None,
             ):
         
-        if idx_ignore is None:
-            idx_ignore = np.zeros(len(df), dtype=bool)
-        assert len(df) == len(idx_ignore)
-
+        idx_ignore = self.get_split_initialize_idx_ignore(df, idx_ignore=idx_ignore)
         # Load the split on which MegaDescriptor was trained
         train_df = pd.read_csv(os.path.join('csv', 'combined_all.csv'))
         # Select data for the dataset in question
@@ -134,11 +134,9 @@ class Analysis_WildlifeDataset(Analysis):
         idx_database = np.where((~idx_ignore) * idx_train)[0]
         return idx_database, idx_query
 
-    def get_split(self, df, idx_ignore=None):
-        if idx_ignore is None:
-            idx_ignore = np.array(df['identity'] == 'unknown')
+    def get_split(self, df, **kwargs):
         name = self.__class__.__name__.split('_')[-1]
-        return self.get_split_general(df, name, idx_ignore=idx_ignore)
+        return self.get_split_general(df, name, **kwargs)
 
 class Analysis_HyenaID2022(Analysis_WildlifeDataset):
     def __init__(self):
@@ -184,10 +182,7 @@ class Analysis_SeaTurtleIDHeads(Analysis_WildlifeDataset):
 
 class Analysis_SeaTurtleID2022(Analysis_SeaTurtleIDHeads):
     def get_split(self, df, df_old, idx_ignore=None):
-        if idx_ignore is None:
-            idx_ignore = np.zeros(len(df), dtype=bool)
-        assert len(df) == len(idx_ignore)
-
+        idx_ignore = self.get_split_initialize_idx_ignore(df, idx_ignore=idx_ignore)
         new_identities = set(df['identity']) - set(df_old['identity'])
         idx_query = []
         for i, (_, df_row) in enumerate(df.iterrows()):
