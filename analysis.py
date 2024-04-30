@@ -143,6 +143,13 @@ class Analysis_WildlifeDataset(Analysis):
         name = self.__class__.__name__.split('_')[-1]
         return self.get_split_general(df, name, idx_ignore=idx_ignore, **kwargs)
 
+class Analysis_HyenaID2022(Analysis_WildlifeDataset):
+    def __init__(self):
+        self.sides = {'left': 0, 'top': 1, 'right': 2}
+        self.diff_to_matches = {0: 'match diff = 0', 1: 'match diff = 1', 2: 'match diff = 2'}
+        self.names_categories = ['same ind', 'diff ind']
+        super().__init__()
+
 class Analysis_SeaTurtleIDHeads(Analysis_WildlifeDataset):
     def __init__(self):
         self.sides = {'left': 0, 'topleft': 1, 'top': 2, 'topright': 3, 'right': 4}
@@ -177,6 +184,9 @@ class Analysis_SeaTurtleIDHeads(Analysis_WildlifeDataset):
                 return 'diff ind - same setup'
             else:
                 return 'diff ind - diff setup'
+
+class Analysis_SeaTurtleID2022(Analysis_SeaTurtleIDHeads):
+    pass
 
 class Analysis_ZindiTurtleRecall(Analysis_WildlifeDataset):
     def __init__(self):
