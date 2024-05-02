@@ -3,9 +3,15 @@ import numpy as np
 import pandas as pd
 
 class Analysis():
-    def __init__(self):
+    def __init__(self, diff_to_matches=None):
         self.n_sides = len(self.sides)
         self.names_split = ['database-database', 'query-query', 'database-query']
+        if diff_to_matches is None:
+            if self.n_sides == 2:
+                diff_to_matches = {0: 'same side', 1: 'diff side'}        
+            else:
+                diff_to_matches = {i: f'diff = {i}' for i in range(self.n_sides)}
+        self.diff_to_matches = diff_to_matches
         self.check_data()
 
     def check_data(self):
@@ -89,11 +95,10 @@ class Analysis():
         return results
 
 class Analysis_SarahZelvy(Analysis):
-    def __init__(self):
+    def __init__(self, **kwargs):
         self.sides = {'left': 0, 'right': 1}
-        self.diff_to_matches = {0: 'match same side', 1: 'match diff side'}
         self.names_categories = ['same ind', 'diff ind']
-        super().__init__()
+        super().__init__(**kwargs)
 
     def get_split(self, df, idx_ignore=None):
         idx_ignore = self.get_split_initialize_idx_ignore(df, idx_ignore=idx_ignore)
@@ -139,18 +144,16 @@ class Analysis_WildlifeDataset(Analysis):
         return self.get_split_general(df, name, **kwargs)
 
 class Analysis_HyenaID2022(Analysis_WildlifeDataset):
-    def __init__(self):
+    def __init__(self, **kwargs):
         self.sides = {'left': 0, 'top': 1, 'right': 2}
-        self.diff_to_matches = {0: 'match diff = 0', 1: 'match diff = 1', 2: 'match diff = 2'}
         self.names_categories = ['same ind', 'diff ind']
-        super().__init__()
+        super().__init__(**kwargs)
 
 class Analysis_SeaTurtleIDHeads(Analysis_WildlifeDataset):
-    def __init__(self):
+    def __init__(self, **kwargs):
         self.sides = {'left': 0, 'topleft': 1, 'top': 2, 'topright': 3, 'right': 4}
-        self.diff_to_matches = {0: 'match diff = 0', 1: 'match diff = 1', 2: 'match diff = 2', 3: 'match diff = 3', 4: 'match diff = 4'}
         self.names_categories = ['same ind - same day', 'same ind - same setup', 'same ind - diff setup', 'diff ind - same setup', 'diff ind - diff setup']
-        super().__init__()
+        super().__init__(**kwargs)
         
     def get_setup_id(self, date):
         if date.year <= 2013:
@@ -193,8 +196,7 @@ class Analysis_SeaTurtleID2022(Analysis_SeaTurtleIDHeads):
         return idx_database, idx_query
 
 class Analysis_ZindiTurtleRecall(Analysis_WildlifeDataset):
-    def __init__(self):
+    def __init__(self, **kwargs):
         self.sides = {'left': 0, 'top': 1, 'right': 2}
-        self.diff_to_matches = {0: 'match diff = 0', 1: 'match diff = 1', 2: 'match diff = 2'}
         self.names_categories = ['same ind', 'diff ind']
-        super().__init__()
+        super().__init__(**kwargs)
