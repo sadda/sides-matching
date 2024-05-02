@@ -3,29 +3,40 @@ import numpy as np
 import pandas as pd
 
 class Analysis():
-    def __init__(self, diff_to_matches=None):
+    def __init__(self):
         self.n_sides = len(self.sides)
         self.names_split = ['database-database', 'query-query', 'database-query']
-        if diff_to_matches is None:
-            if self.n_sides == 2:
-                diff_to_matches = {0: 'same side', 1: 'diff side'}        
-            else:
-                diff_to_matches = {i: f'diff = {i}' for i in range(self.n_sides)}
+        if self.sides_cycle:
+            self.max_diff = int(np.floor(self.n_sides / 2))
+        else:
+            self.max_diff = self.n_sides - 1
+        if self.max_diff == 1:
+            diff_to_matches = {0: 'same side', 1: 'diff side'}        
+        else:
+            diff_to_matches = {i: f'diff = {i}' for i in range(self.max_diff+1)}
         self.diff_to_matches = diff_to_matches
         self.check_data()
 
     def check_data(self):
-        array1 = range(self.n_sides)
-        array2 = np.sort(list(self.sides.values()))
-        array3 = np.sort(list(self.diff_to_matches.keys()))
-        if not np.array_equal(array1, array2):
+        array1a = range(self.n_sides)
+        array1b = np.sort(list(self.sides.values()))
+        array2a = range(self.max_diff+1)
+        array2b = np.sort(list(self.diff_to_matches.keys()))
+        if not np.array_equal(array1a, array1b):
             raise Exception('Values in self.sides must be 0..n')
-        if not np.array_equal(array1, array3):
-            raise Exception('Values in self.sides must be 0..n')
+        if not np.array_equal(array2a, array2b):
+            raise Exception('Values in self.diffs_to_matches are wrong')
 
     def get_split(self, *args, **kwargs):
         raise NotImplementedError('Must be implemented by subclasses')
 
+    def difference(self, i_side, j_side):
+        # TODO: write test function
+        if self.sides_cycle:
+            return min(np.mod(int(i_side)-int(j_side), self.n_sides), np.mod(int(j_side)-int(i_side), self.n_sides))
+        else:
+            return np.abs(int(i_side)-int(j_side))
+    
     def get_split_initialize_idx_ignore(self, df, idx_ignore=None):        
         if idx_ignore is None:
             idx_ignore = np.zeros(len(df), dtype=bool)
@@ -40,6 +51,8 @@ class Analysis():
             orientation_pred
             ):
         
+        # TODO: outdated
+        raise Exception('Function outdated')
         matches = {}
         for k in range(orientation_pred.shape[1]):
             matches[k] = {}
@@ -63,11 +76,17 @@ class Analysis():
         return matches
 
     def initialite_results_split_similarity(self):
-        return {i: {j: {k: [] for k in self.names_categories} for j in range(self.n_sides)} for i in self.names_split}
+        return {i: {j: {k: [] for k in self.names_categories} for j in range(self.max_diff+1)} for i in self.names_split}
     
     def compute_data_split_similarity(self, df):
         identity = df['identity'].to_numpy()
         orientation = df['orientation'].apply(lambda x: self.sides[x] if x in self.sides else np.nan).to_numpy()
+        # Test if there are only integers
+        orientation_test1 = pd.Series(orientation)
+        orientation_test1 = orientation_test1[~orientation_test1.isnull()]
+        orientation_test2 = orientation_test1.astype(int)
+        if (orientation_test2 - orientation_test1).abs().sum() != 0:
+            raise Exception('df column orientation must contain integers only')
         return {'identity': identity, 'orientation': orientation}
     
     def compute_index_split_similarity(self, data, i, j):
@@ -89,7 +108,7 @@ class Analysis():
             for i_index, i in enumerate(idx):
                 jdx_range = jdx[i_index+1:] if array_equal else jdx
                 for j in jdx_range:
-                    diff = abs(data['orientation'][i] - data['orientation'][j])
+                    diff = self.difference(data['orientation'][i], data['orientation'][j])
                     index = self.compute_index_split_similarity(data, i, j)
                     results[name][diff][index].append(similarity[i,j])
         return results
@@ -97,6 +116,7 @@ class Analysis():
 class Analysis_SarahZelvy(Analysis):
     def __init__(self, **kwargs):
         self.sides = {'left': 0, 'right': 1}
+        self.sides_cycle = False
         self.names_categories = ['same ind', 'diff ind']
         super().__init__(**kwargs)
 
@@ -145,13 +165,29 @@ class Analysis_WildlifeDataset(Analysis):
 
 class Analysis_HyenaID2022(Analysis_WildlifeDataset):
     def __init__(self, **kwargs):
-        self.sides = {'left': 0, 'top': 1, 'right': 2}
+        self.sides = {'left': 0, 'frontleft': 1, 'front': 2, 'frontright': 3, 'right': 4, 'backright': 5, 'back': 6, 'backleft': 7}
+        self.sides_cycle = True
+        self.names_categories = ['same ind', 'diff ind']
+        super().__init__(**kwargs)
+
+class Analysis_LeopardID2022(Analysis_WildlifeDataset):
+    def __init__(self, **kwargs):
+        self.sides = {'left': 0, 'front': 1, 'right': 2, 'back': 3}
+        self.sides_cycle = True
+        self.names_categories = ['same ind', 'diff ind']
+        super().__init__(**kwargs)
+
+class Analysis_NyalaData(Analysis_WildlifeDataset):
+    def __init__(self, **kwargs):
+        self.sides = {'left': 0, 'right': 1}
+        self.sides_cycle = False
         self.names_categories = ['same ind', 'diff ind']
         super().__init__(**kwargs)
 
 class Analysis_SeaTurtleIDHeads(Analysis_WildlifeDataset):
     def __init__(self, **kwargs):
         self.sides = {'left': 0, 'topleft': 1, 'top': 2, 'topright': 3, 'right': 4}
+        self.sides_cycle = False
         self.names_categories = ['same ind - same day', 'same ind - same setup', 'same ind - diff setup', 'diff ind - same setup', 'diff ind - diff setup']
         super().__init__(**kwargs)
         
@@ -195,8 +231,23 @@ class Analysis_SeaTurtleID2022(Analysis_SeaTurtleIDHeads):
         idx_database = []
         return idx_database, idx_query
 
+class Analysis_StripeSpotter(Analysis_WildlifeDataset):
+    def __init__(self, **kwargs):
+        self.sides = {'left': 0, 'right': 1}
+        self.sides_cycle = False
+        self.names_categories = ['same ind', 'diff ind']
+        super().__init__(**kwargs)
+
+class Analysis_WhaleSharkID(Analysis_WildlifeDataset):
+    def __init__(self, **kwargs):
+        self.sides = {'left': 0, 'back': 1, 'right': 2}
+        self.sides_cycle = False
+        self.names_categories = ['same ind', 'diff ind']
+        super().__init__(**kwargs)
+
 class Analysis_ZindiTurtleRecall(Analysis_WildlifeDataset):
     def __init__(self, **kwargs):
         self.sides = {'left': 0, 'top': 1, 'right': 2}
+        self.sides_cycle = False
         self.names_categories = ['same ind', 'diff ind']
         super().__init__(**kwargs)
