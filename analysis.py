@@ -139,18 +139,13 @@ class Analysis_WildlifeDataset(Analysis):
         train_df = pd.read_csv(os.path.join('csv', 'combined_all.csv'))
         # Select data for the dataset in question
         train_df = train_df[train_df['path'].str.startswith(dataset_name + '/')]
-        # Extract the names of the training examples
-        train_names = []
-        for _, row in train_df.iterrows():
+        df_names = []
+        for _, row in df.iterrows():
             image_id = str(row['image_id'])
             file_name = os.path.basename(row['path'])
             file_name, ext = os.path.splitext(file_name)
-            if not file_name.endswith(image_id):
-                raise Exception('Something went wrong')
-            file_name = file_name[:len(file_name)-len(image_id)-1]
-            train_names.append(file_name + ext)
-        # Extract names from  and check for uniqueness
-        df_names = [os.path.basename(path) for path in df['path']]
+            df_names.append(f'{file_name}_{image_id}{ext}')
+        train_names = [os.path.basename(path) for path in train_df['path']]
         if len(df_names) != len(np.unique(df_names)):
             raise Exception('File names must be unique.')
         # Extract query and database indices
