@@ -1,12 +1,51 @@
 import os
 import copy
 import numpy as np
+import pandas as pd
 import timm
 from wildlife_datasets import datasets
 from wildlife_tools.data import WildlifeDataset
 from wildlife_tools.similarity import CosineSimilarity
 from wildlife_tools.features import DeepFeatures
 from typing import Optional, List, Tuple
+
+class KyparissiaTurtles(datasets.DatasetFactory):
+    def create_catalogue(self) -> pd.DataFrame:
+        data = pd.read_csv(os.path.join(self.root, 'annotations.csv'))
+
+        # Get the bounding box
+        columns_bbox = ['bbox_x', 'bbox_y', 'bbox_width', 'bbox_height']
+        bbox = data[columns_bbox].to_numpy()
+        bbox = pd.Series(list(bbox))
+
+        # Finalize the dataframe
+        df = pd.DataFrame({
+            'image_id': range(len(data)),
+            'path': 'images' + os.path.sep + data['image_name'],
+            'identity': data['image_name'].apply(lambda x: x.split('_')[0]).astype(int),
+            'date': data['image_name'].apply(lambda x: x.split('_')[1]).astype(int),
+            'orientation': data['image_name'].apply(lambda x: x.split('_')[2]),
+            'bbox': bbox,
+        })
+        df = df[df['orientation'] != 'top']
+        df['image_id'] = range(len(df))
+        return self.finalize_catalogue(df)
+
+class KyparissiaTurtles_nobbox(datasets.DatasetFactory):
+    def create_catalogue(self) -> pd.DataFrame:
+        data = pd.read_csv(os.path.join(self.root, 'annotations.csv'))
+
+        # Finalize the dataframe
+        df = pd.DataFrame({
+            'image_id': range(len(data)),
+            'path': 'images' + os.path.sep + data['image_name'],
+            'identity': data['image_name'].apply(lambda x: x.split('_')[0]).astype(int),
+            'date': data['image_name'].apply(lambda x: x.split('_')[1]).astype(int),
+            'orientation': data['image_name'].apply(lambda x: x.split('_')[2]),
+        })
+        df = df[df['orientation'] != 'top']
+        df['image_id'] = range(len(df))
+        return self.finalize_catalogue(df)
 
 def get_normalized_features(
         file_name: str,
