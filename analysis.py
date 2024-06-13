@@ -165,6 +165,30 @@ class Analysis_HyenaID2022(Analysis_WildlifeDataset):
         self.names_categories = ['same ind', 'diff ind']
         super().__init__(**kwargs)
 
+class Analysis_KyparissiaTurtles(Analysis_WildlifeDataset):
+    def __init__(self, **kwargs):
+        self.sides = {'left': 0, 'right': 1}
+        self.sides_cycle = False
+        self.names_categories = ['same ind - same year', 'same ind - diff year', 'diff ind - same year', 'diff ind - diff year']
+        super().__init__(**kwargs)
+
+    def compute_data_split_similarity(self, df):
+        data = super().compute_data_split_similarity(df)
+        data['date'] = pd.to_datetime(df['date']).to_numpy()
+        return data
+    
+    def compute_index_split_similarity(self, data, i, j):
+        if data['identity'][i] == data['identity'][j]:
+            if data['date'][i] == data['date'][j]:
+                return 'same ind - same year'
+            else:
+                return 'same ind - diff year'
+        else:
+            if data['date'][i] == data['date'][j]:
+                return 'diff ind - same year'
+            else:
+                return 'diff ind - diff year'
+
 class Analysis_LeopardID2022(Analysis_WildlifeDataset):
     def __init__(self, **kwargs):
         self.sides = {'left': 0, 'front': 1, 'right': 2, 'back': 3}
