@@ -3,11 +3,11 @@ import copy
 import numpy as np
 import pandas as pd
 import timm
+from sklearn.metrics.pairwise import cosine_similarity
 from wildlife_datasets import datasets
 from wildlife_tools.data import WildlifeDataset
-from wildlife_tools.similarity import CosineSimilarity
 from wildlife_tools.features import DeepFeatures
-from typing import Optional, List, Tuple
+from typing import Optional, List, Tuple, Callable
 
 class AmvrakikosTurtles(datasets.DatasetFactory):
     def create_catalogue(self) -> pd.DataFrame:
@@ -119,6 +119,7 @@ def compute_predictions(
         features_query: np.ndarray,
         features_database: np.ndarray,
         ignore: Optional[List[List[int]]] = None,
+        matcher: Callable = cosine_similarity,
         k: int = 4,
         batch_size: int = 1000
         ) -> Tuple[np.ndarray, np.ndarray]:
@@ -129,6 +130,7 @@ def compute_predictions(
         features_database (np.ndarray): Database features of size n_database*n_feature
         ignore (Optional[List[List[int]]], optional): `ignore[i]` is a list of indices
             in the database ignores for i-th query.
+        matcher (Callable, optional): function computing similarity.
         k (int, optional): Returned number of predictions.
         batch_size (int, optional): Size of the computaiton batch.
 
@@ -145,12 +147,11 @@ def compute_predictions(
     if ignore is None:
         ignore = [[] for _ in range(n_query)]
     
-    matcher = CosineSimilarity()
     idx_true = np.array(range(n_query))
     idx_pred = np.zeros((n_query, k), dtype=np.int32)
     for chunk in chunks:
         # Compute the cosine similarity between the query chunk and the database
-        similarity = matcher(query=features_query[chunk], database=features_database)['cosine']
+        similarity = matcher(features_query[chunk], features_database)
         # Set -infinity for ignored indices
         for i in range(len(chunk)):
             similarity[i, ignore[chunk[i]]] = -np.inf
