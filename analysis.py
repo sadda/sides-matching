@@ -165,7 +165,7 @@ class Analysis_HyenaID2022(Analysis_WildlifeDataset):
         self.names_categories = ['same ind', 'diff ind']
         super().__init__(**kwargs)
 
-class Analysis_KyparissiaTurtles(Analysis_WildlifeDataset):
+class Analysis_AmvrakikosTurtles(Analysis_WildlifeDataset):
     def __init__(self, **kwargs):
         self.sides = {'left': 0, 'right': 1}
         self.sides_cycle = False
@@ -189,7 +189,7 @@ class Analysis_KyparissiaTurtles(Analysis_WildlifeDataset):
             else:
                 return 'diff ind - diff year'
 
-class Analysis_ReunionTurtles(Analysis_KyparissiaTurtles):
+class Analysis_ReunionTurtles(Analysis_AmvrakikosTurtles):
     pass
 
 class Analysis_LeopardID2022(Analysis_WildlifeDataset):

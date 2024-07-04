@@ -9,7 +9,7 @@ from wildlife_tools.similarity import CosineSimilarity
 from wildlife_tools.features import DeepFeatures
 from typing import Optional, List, Tuple
 
-class KyparissiaTurtles(datasets.DatasetFactory):
+class AmvrakikosTurtles(datasets.DatasetFactory):
     def create_catalogue(self) -> pd.DataFrame:
         data = pd.read_csv(os.path.join(self.root, 'annotations.csv'))
 
