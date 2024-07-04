@@ -66,22 +66,6 @@ class ReunionTurtles(datasets.DatasetFactory):
             'id_code': list(code)
         })
         return self.finalize_catalogue(df)
-    
-class KyparissiaTurtles_nobbox(datasets.DatasetFactory):
-    def create_catalogue(self) -> pd.DataFrame:
-        data = pd.read_csv(os.path.join(self.root, 'annotations.csv'))
-
-        # Finalize the dataframe
-        df = pd.DataFrame({
-            'image_id': range(len(data)),
-            'path': 'images' + os.path.sep + data['image_name'],
-            'identity': data['image_name'].apply(lambda x: x.split('_')[0]).astype(int),
-            'date': data['image_name'].apply(lambda x: x.split('_')[1]).astype(int),
-            'orientation': data['image_name'].apply(lambda x: x.split('_')[2]),
-        })
-        df = df[df['orientation'] != 'top']
-        df['image_id'] = range(len(df))
-        return self.finalize_catalogue(df)
 
 def get_normalized_features(
         file_name: str,
