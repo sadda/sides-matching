@@ -43,38 +43,6 @@ class Analysis():
         assert len(df) == len(idx_ignore)
         return idx_ignore
 
-    def get_matches(
-            self,
-            y_true,
-            y_pred,
-            orientation_true,
-            orientation_pred
-            ):
-        
-        # TODO: outdated
-        raise Exception('Function outdated')
-        matches = {}
-        for k in range(orientation_pred.shape[1]):
-            matches[k] = {}
-            for key in self.diff_to_matches.values():
-                matches[k][key] = 0
-            matches[k]['other'] = 0
-            matches[k]['wrong match'] = 0
-            for i in range(len(orientation_true)):
-                if y_true[i] == y_pred[i][k]:
-                    if orientation_true[i] not in self.sides.keys() or orientation_pred[i][k] not in self.sides.keys():
-                        matches[k]['other'] += 1
-                    else:
-                        diff = abs(self.sides[orientation_true[i]] - self.sides[orientation_pred[i][k]])
-                        matches[k][self.diff_to_matches[diff]] += 1
-                else:
-                    matches[k]['wrong match'] += 1
-        matches = pd.DataFrame(matches).T
-        for column in matches.columns:
-            matches[column] = (matches[column] / len(orientation_pred) * 100).round(2).astype(str) + '%'
-        matches.index = 'match k = ' + (matches.index + 1).astype(str)
-        return matches
-
     def initialite_results_split_similarity(self):
         return {i: {j: {k: [] for k in self.names_categories} for j in range(self.max_diff+1)} for i in self.names_split}
     
