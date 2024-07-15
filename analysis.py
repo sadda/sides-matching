@@ -160,6 +160,9 @@ class Analysis_AmvrakikosTurtles(Analysis_WildlifeDataset):
 class Analysis_ReunionTurtles(Analysis_AmvrakikosTurtles):
     pass
 
+class Analysis_SeaTurtleIDSubset(Analysis_AmvrakikosTurtles):
+    pass
+
 class Analysis_LeopardID2022(Analysis_WildlifeDataset):
     def __init__(self, **kwargs):
         self.sides = {'left': 0, 'front': 1, 'right': 2, 'back': 3}

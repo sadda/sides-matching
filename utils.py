@@ -67,6 +67,24 @@ class ReunionTurtles(datasets.DatasetFactory):
         })
         return self.finalize_catalogue(df)
 
+class SeaTurtleIDSubset(datasets.DatasetFactory):
+    def create_catalogue(self) -> pd.DataFrame:
+        data = pd.read_csv(os.path.join(self.root, 'annotations.csv'))
+        bbox = pd.read_csv(os.path.join(self.root, 'bbox.csv'))
+        data = pd.merge(data, bbox, left_on='path', right_on='image_name')
+
+        dates = data['date'].str.split('_')
+        dates = dates.apply(lambda x: x[2] + '-' + x[1] + '-' + x[0])
+        df = pd.DataFrame({
+            'image_id': range(len(data)),
+            'path': 'images/' + data['path'],
+            'identity': data['identity'],
+            'date': dates,
+            'orientation': data['orientation'],
+            'bbox': data[['bbox_x', 'bbox_y', 'bbox_width', 'bbox_height']].values.tolist()
+        })
+        return self.finalize_catalogue(df)
+
 def get_normalized_features(
         file_name: str,
         dataset: Optional[WildlifeDataset] = None,
