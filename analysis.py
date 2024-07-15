@@ -142,17 +142,17 @@ class Analysis_AmvrakikosTurtles(Analysis_WildlifeDataset):
 
     def compute_data_split_similarity(self, df):
         data = super().compute_data_split_similarity(df)
-        data['date'] = pd.to_datetime(df['date']).to_numpy()
+        data['year'] = df['year'].to_numpy()
         return data
     
     def compute_index_split_similarity(self, data, i, j):
         if data['identity'][i] == data['identity'][j]:
-            if data['date'][i] == data['date'][j]:
+            if data['year'][i] == data['year'][j]:
                 return 'same ind - same year'
             else:
                 return 'same ind - diff year'
         else:
-            if data['date'][i] == data['date'][j]:
+            if data['year'][i] == data['year'][j]:
                 return 'diff ind - same year'
             else:
                 return 'diff ind - diff year'
