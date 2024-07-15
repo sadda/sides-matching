@@ -33,7 +33,7 @@ class AmvrakikosTurtles(datasets.DatasetFactory):
 
 class ReunionTurtles(datasets.DatasetFactory):
     def create_catalogue(self) -> pd.DataFrame:
-        data = pd.read_csv(os.path.join(self.root, 'Data.csv'))
+        data = pd.read_csv(os.path.join(self.root, 'data.csv'))
 
         date = pd.to_datetime(data['Date'])
         year = date.apply(lambda x: x.year)
