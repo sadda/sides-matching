@@ -140,6 +140,16 @@ class Analysis_AmvrakikosTurtles(Analysis_WildlifeDataset):
         self.names_categories = ['same ind - same year', 'same ind - diff year', 'diff ind - same year', 'diff ind - diff year']
         super().__init__(**kwargs)
 
+    def get_split(self, df, **kwargs):
+        if 'species' in kwargs:
+            species = kwargs.pop('species')
+            idx_ignore = (df['species'] != species).to_numpy()
+            if 'idx_ignore' in kwargs:
+                idx_ignore = idx_ignore + kwargs.pop('idx_ignore')
+            return super().get_split(df, idx_ignore=idx_ignore, **kwargs)
+        else:
+            return super().get_split(df, **kwargs)
+
     def compute_data_split_similarity(self, df):
         data = super().compute_data_split_similarity(df)
         data['year'] = df['year'].to_numpy()
