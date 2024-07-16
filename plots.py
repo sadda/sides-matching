@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 
-def plot1(analysis, similarity_split, i_diff, dataset_name=None, file_name=None):
+def plot1(analysis, similarity_split, i_diff, dataset_name=None, file_name=None, ylim=None):
     fig = plt.figure()
     for j, name_split in enumerate(['database-database', 'database-query', 'query-query']):
         ax = fig.add_subplot(1, 3, j+1)
@@ -10,9 +10,10 @@ def plot1(analysis, similarity_split, i_diff, dataset_name=None, file_name=None)
 
         plt.boxplot(similarity_boxplot)
         ax.set_xticklabels(analysis.names_categories)
-        ax.set_aspect(8)
+        #ax.set_aspect(8)
         plt.xticks(rotation=25)
-        plt.ylim([-0.2, 1])
+        if ylim is not None:
+            plt.ylim(ylim)
         plt.axhline(y=0, color='r', linestyle='dotted')                
         if j == 0:
             plt.ylabel('similarity')
@@ -24,7 +25,7 @@ def plot1(analysis, similarity_split, i_diff, dataset_name=None, file_name=None)
     if file_name is not None:
         plt.savefig(file_name, bbox_inches='tight', dpi=300)
 
-def plot2(analysis, similarity_split, name_category, dataset_name=None, file_name=None):
+def plot2(analysis, similarity_split, name_category, dataset_name=None, file_name=None, ylim=None):
     fig = plt.figure()
     for j, name_split in enumerate(['database-database', 'database-query', 'query-query']):    
         ax = fig.add_subplot(1, 3, j+1)
@@ -34,9 +35,10 @@ def plot2(analysis, similarity_split, name_category, dataset_name=None, file_nam
 
         plt.boxplot(similarity_boxplot)
         ax.set_xticklabels(analysis.diff_to_matches.values())
-        ax.set_aspect(8)
+        #ax.set_aspect(8)
         plt.xticks(rotation=25)
-        plt.ylim([-0.2, 1])
+        if ylim is not None:
+            plt.ylim(ylim)
         plt.axhline(y=0, color='r', linestyle='dotted')
         if j == 0:
             plt.ylabel('similarity')
