@@ -139,7 +139,8 @@ def compute_predictions(
         ignore: Optional[List[List[int]]] = None,
         matcher: Callable = cosine_similarity,
         k: int = 4,
-        batch_size: int = 1000
+        batch_size: int = 1000,
+        return_score: bool = False
         ) -> Tuple[np.ndarray, np.ndarray]:
     """Computes a closest match in the database for each vector in the query set.
 
@@ -151,10 +152,12 @@ def compute_predictions(
         matcher (Callable, optional): function computing similarity.
         k (int, optional): Returned number of predictions.
         batch_size (int, optional): Size of the computaiton batch.
+        return_score (bool, optional): Whether the similalarity is returned.
 
     Returns:
         Vector of size (n_query,) and array of size (n_query,k). The latter are indices
-            in the database for the closest matches (with ignored `ignore` indices)
+            in the database for the closest matches (with ignored `ignore` indices).
+            If `return_score`, it also returns an array of size (n_query,k) of scores.
     """
 
     # Create batch chunks
@@ -167,6 +170,7 @@ def compute_predictions(
     
     idx_true = np.array(range(n_query))
     idx_pred = np.zeros((n_query, k), dtype=np.int32)
+    scores = np.zeros((n_query, k))
     for chunk in chunks:
         # Compute the cosine similarity between the query chunk and the database
         similarity = matcher(features_query[chunk], features_database)
@@ -175,7 +179,12 @@ def compute_predictions(
             similarity[i, ignore[chunk[i]]] = -np.inf
         # Find the closest matches (k highest values)
         idx_pred[chunk,:] = (-similarity).argsort(axis=-1)[:, :k]
-    return idx_true, idx_pred
+        scores[chunk,:] = np.take_along_axis(similarity, idx_pred[chunk,:], axis=-1)
+        #scores[chunk,:] = similarity[:, ]
+    if return_score:
+        return idx_true, idx_pred, scores
+    else:
+        return idx_true, idx_pred
 
 def compute_predictions_disjoint(
         features: np.ndarray,
