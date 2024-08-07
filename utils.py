@@ -259,7 +259,7 @@ class WD(WildlifeDataset):
         n_rows = kwargs.pop('n_rows', min(len(y_true), 5))
         return self.plot_grid(idx=idx, n_rows=n_rows, n_cols=n_cols, header_cols=header_cols, **kwargs)
 
-def get_df_split(dataset_class, root_dataset, analysis, **kwargs):
+def get_dataset(dataset_class, root_dataset):
     d = dataset_class(root_dataset)
     if 'date' in d.df.columns:
         date = d.df['date']
@@ -272,7 +272,10 @@ def get_df_split(dataset_class, root_dataset, analysis, **kwargs):
     else:
         d.df['date'] = np.nan
         d.df['year'] = np.nan
-    
+    return d
+
+def get_df_split(dataset_class, root_dataset, analysis, **kwargs):
+    d = get_dataset(dataset_class, root_dataset)
     idx_unknown_side = d.df['orientation'].apply(lambda x: x not in analysis.sides.keys())
     idx_unknown_identity = d.df['identity'] == 'unknown'
     idx_ignore = (idx_unknown_side + idx_unknown_identity).to_numpy()
