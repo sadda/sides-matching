@@ -6,7 +6,7 @@ model_name = 'MegaDescriptor-L-384'
 root_datasets = '/data/wildlife_datasets/data'
 
 dataset_classes = [
-    (AmvrakikosTurtles, 'Amvrakikos Turtles'),
+    (AmvrakikosTurtles, 'AmvrakikosTurtles'),
     (ReunionTurtles, 'ReunionTurtles'),
     (SeaTurtleIDSubset, 'SeaTurtleIDSubset'),
 ]
