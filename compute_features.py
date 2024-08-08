@@ -1,24 +1,14 @@
 import os
 import torchvision.transforms as T
-
-from wildlife_datasets import datasets
 from utils import AmvrakikosTurtles, ReunionTurtles, SeaTurtleIDSubset, WD, get_extractor, get_normalized_features
 
 model_name = 'MegaDescriptor-L-384'
 root_datasets = '/data/wildlife_datasets/data'
 
 dataset_classes = [
-    (datasets.HyenaID2022, 'HyenaID2022'),
     (AmvrakikosTurtles, 'Amvrakikos Turtles'),
     (ReunionTurtles, 'ReunionTurtles'),
     (SeaTurtleIDSubset, 'SeaTurtleIDSubset'),
-    (datasets.LeopardID2022, 'LeopardID2022'),
-    (datasets.NyalaData, 'NyalaData'),    
-    (datasets.SeaTurtleID2022, 'SeaTurtleID2022'),
-    (datasets.SeaTurtleIDHeads, 'SeaTurtleIDHeads'),
-    (datasets.StripeSpotter, 'StripeSpotter'),
-    (datasets.WhaleSharkID, 'WhaleSharkID'),
-    (datasets.ZindiTurtleRecall, 'ZindiTurtleRecall'),
 ]
 
 img_size = int(model_name.split('-')[-1])
