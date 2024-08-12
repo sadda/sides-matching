@@ -103,7 +103,7 @@ class Prediction():
         self.n_individuals = n_individuals
     
     def compute_accuracy(self, mods):
-        metrics = [f'unique {i}' for i in range(1, 1+self.n_individuals)]
+        metrics = [f'top {i}' for i in range(1, 1+self.n_individuals)]
         accuracy = {mod: {metric: 0 for metric in metrics} for mod in mods}
         
         # Loop over individual query images
@@ -139,7 +139,7 @@ class Prediction():
                 identity_pred_unique = unique_no_sort(identity_pred)            
                 # Compute the metrics
                 for i in range(1, 1+self.n_individuals):
-                    accuracy[mod][f'unique {i}'] += (identity_true in identity_pred_unique[:i]) / len(self.true)
+                    accuracy[mod][f'top {i}'] += (identity_true in identity_pred_unique[:i]) / len(self.true)
         self.accuracy = accuracy
 
     def split_scores(self):
