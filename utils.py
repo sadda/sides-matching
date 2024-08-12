@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import timm
 from sklearn.metrics.pairwise import cosine_similarity
+import torchvision.transforms as T
 from wildlife_datasets import datasets
 from wildlife_tools.data import WildlifeDataset
 from wildlife_tools.features import DeepFeatures
@@ -285,3 +286,15 @@ def get_df_split(dataset_class, root_dataset, analysis, **kwargs):
 
 def unique_no_sort(array):
     return pd.Series(array).unique()
+
+def get_transform(flip=False, grayscale=False, img_size=None, normalize=False):
+    transform = T.Compose([])
+    if flip:
+        transform = T.Compose([*transform.transforms, T.RandomHorizontalFlip(1)])
+    if grayscale:
+        transform = T.Compose([*transform.transforms, T.Grayscale(3)])        
+    if img_size is not None:
+        transform = T.Compose([*transform.transforms, T.Resize([img_size, img_size])])
+    if normalize:
+        transform = T.Compose([*transform.transforms, T.ToTensor(), T.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))])
+    return transform
