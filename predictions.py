@@ -24,8 +24,8 @@ class Data_MegaDescriptor(Data):
         self.matcher = cosine_similarity
 
     def get_features(self):
-        features_database = get_normalized_features(self.path_features_query)
-        features_query = get_normalized_features(self.path_features_database)
+        features_database = get_normalized_features(self.path_features_database)
+        features_query = get_normalized_features(self.path_features_query)
         return features_database, features_query
 
 class Data_L0(Data):
@@ -53,9 +53,9 @@ class Data_SIFT():
         df['path'] = df['path'].apply(lambda x: os.path.join(root_images, x))
         if image_loader is None:
             if 'bbox' in df.columns:
-                image_loader = Loader(method=1, min_size=90)
+                image_loader = Loader(img_load='bbox', img_size=90)
             else:
-                image_loader = Loader(method=0, min_size=90)
+                image_loader = Loader(img_load='full', img_size=90)
         if keypoint_extractor is None:
             keypoint_extractor = SIFT()
         if keypoint_matcher is None:
