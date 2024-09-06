@@ -142,7 +142,7 @@ class Prediction():
                     accuracy[mod][f'top {i}'] += (identity_true in identity_pred_unique[:i]) / len(self.true)
         self.accuracy = accuracy
 
-    def split_scores(self):
+    def split_scores(self, save_idx=False):
         scores_split = {x: {y: {z: [] for z in {True, False}} for y in {True, False}} for x in {True, False}}
         for i_score, (i_pred, i) in enumerate(zip(self.pred, self.true)):
             for j_score, j in enumerate(i_pred):
@@ -150,5 +150,9 @@ class Prediction():
                 equal_orientation = self.orientation[i] == self.orientation[j]
                 equal_year = self.year[i] == self.year[j]
                 score = self.scores[i_score, j_score]
-                scores_split[equal_identity][equal_orientation][equal_year].append(score)
+                if save_idx:
+                    score_add = (score, i, j)
+                else:
+                    score_add = score
+                scores_split[equal_identity][equal_orientation][equal_year].append(score_add)
         return scores_split
