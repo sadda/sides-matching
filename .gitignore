@@ -1,6 +1,7 @@
 # Data
 features/
 figures/
+images/
 
 # Tex
 *.synctex.gz
