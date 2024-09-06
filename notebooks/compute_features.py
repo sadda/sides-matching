@@ -1,5 +1,5 @@
 import os
-from utils import AmvrakikosTurtles, ReunionTurtles, SeaTurtleIDSubset, WD, get_extractor, get_normalized_features, get_transform
+from sides_matching import AmvrakikosTurtles, ReunionTurtles, ZakynthosTurtles, WD, get_extractor, get_normalized_features, get_transform
 
 model_name = 'MegaDescriptor-L-384'
 root_datasets = '/data/wildlife_datasets/data'
@@ -7,7 +7,7 @@ root_datasets = '/data/wildlife_datasets/data'
 dataset_classes = [
     (AmvrakikosTurtles, 'AmvrakikosTurtles'),
     (ReunionTurtles, 'ReunionTurtles'),
-    (SeaTurtleIDSubset, 'SeaTurtleIDSubset'),
+    (ZakynthosTurtles, 'ZakynthosTurtles'),
 ]
 
 img_size = int(model_name.split('-')[-1])
