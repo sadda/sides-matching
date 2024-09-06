@@ -3,6 +3,7 @@ import numpy as np
 from scipy.spatial.distance import cdist
 from sklearn.metrics.pairwise import cosine_similarity
 
+from sift_matching import Reader, Loader, SIFT, L1Matcher
 from .utils import get_normalized_features, compute_predictions, unique_no_sort
 
 class Data():
@@ -48,9 +49,7 @@ class Data_SIFT():
             keypoint_matcher = None, 
             reader=None
             ):
-        
-        from sift_matching import Reader, Loader, SIFT, L1Matcher
-        
+                
         df = df.copy()
         df['path'] = df['path'].apply(lambda x: os.path.join(root_images, x))
         if image_loader is None:

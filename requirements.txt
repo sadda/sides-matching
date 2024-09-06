@@ -1,0 +1,4 @@
+scikit-image
+wildlife-datasets>=1.0.4
+wildlife-tools>=0.0.9
+sift_matching @ git+https://github.com/sadda/sift-matching
