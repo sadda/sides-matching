@@ -100,11 +100,12 @@ class Analysis_WildlifeDataset(Analysis):
             df,
             dataset_name,
             idx_ignore=None,
+            root_csv='csv',
             ):
         
         idx_ignore = self.get_split_initialize_idx_ignore(df, idx_ignore=idx_ignore)
         # Load the split on which MegaDescriptor was trained
-        train_df = pd.read_csv(os.path.join('csv', 'combined_all.csv'))
+        train_df = pd.read_csv(os.path.join(root_csv, 'combined_all.csv'))
         # Select data for the dataset in question
         train_df = train_df[train_df['path'].str.startswith(dataset_name + '/')]
         df_names = []
