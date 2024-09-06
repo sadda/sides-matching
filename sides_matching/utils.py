@@ -68,7 +68,7 @@ class ReunionTurtles(datasets.DatasetFactory):
         })
         return self.finalize_catalogue(df)
 
-class SeaTurtleIDSubset(datasets.DatasetFactory):
+class ZakynthosTurtles(datasets.DatasetFactory):
     def create_catalogue(self) -> pd.DataFrame:
         data = pd.read_csv(os.path.join(self.root, 'annotations.csv'))
         bbox = pd.read_csv(os.path.join(self.root, 'bbox.csv'))

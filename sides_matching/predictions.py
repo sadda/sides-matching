@@ -28,7 +28,7 @@ class Data_MegaDescriptor(Data):
         features_query = get_normalized_features(self.path_features_query)
         return features_database, features_query
 
-class Data_L0(Data):
+class Data_TORSOOI(Data):
     def __init__(self, df):
         self.df = df
         self.matcher = lambda x, y: cdist(x, y, lambda a, b: sum(a==b))

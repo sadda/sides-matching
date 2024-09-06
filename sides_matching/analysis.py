@@ -31,7 +31,6 @@ class Analysis():
         raise NotImplementedError('Must be implemented by subclasses')
 
     def difference(self, i_side, j_side):
-        # TODO: write test function
         if self.sides_cycle:
             return min(np.mod(int(i_side)-int(j_side), self.n_sides), np.mod(int(j_side)-int(i_side), self.n_sides))
         else:
@@ -158,7 +157,7 @@ class Analysis_AmvrakikosTurtles(Analysis_WildlifeDataset):
 class Analysis_ReunionTurtles(Analysis_AmvrakikosTurtles):
     pass
 
-class Analysis_SeaTurtleIDSubset(Analysis_AmvrakikosTurtles):
+class Analysis_ZakynthosTurtles(Analysis_AmvrakikosTurtles):
     pass
 
 class Analysis_LeopardID2022(Analysis_WildlifeDataset):
