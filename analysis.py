@@ -81,19 +81,6 @@ class Analysis():
                     results[name][diff][index].append(similarity[i,j])
         return results
 
-class Analysis_SarahZelvy(Analysis):
-    def __init__(self, **kwargs):
-        self.sides = {'left': 0, 'right': 1}
-        self.sides_cycle = False
-        self.names_categories = ['same ind', 'diff ind']
-        super().__init__(**kwargs)
-
-    def get_split(self, df, idx_ignore=None):
-        idx_ignore = self.get_split_initialize_idx_ignore(df, idx_ignore=idx_ignore)
-        idx_database = []
-        idx_query = np.where(~idx_ignore)[0]
-        return idx_database, idx_query
-
 class Analysis_WildlifeDataset(Analysis):
     def get_split_general(
             self,
