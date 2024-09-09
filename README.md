@@ -5,7 +5,7 @@ This repository generates results for our paper, where we analyzed the differenc
 To install the repository, download it first.
 ```script
 git clone git@github.com:sadda/sides-matching.git
-cd sides-matching
+cd sides_matching
 ```
 
 Optionally create a virtual environement. Then install the required packages.
