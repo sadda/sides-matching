@@ -1,4 +1,6 @@
+ipykernel
 scikit-image
+timm==0.9.16
 wildlife-datasets @ git+https://github.com/WildlifeDatasets/wildlife-datasets@datasets
 wildlife-tools>=0.0.9
 sift-matching @ git+https://github.com/sadda/sift-matching
