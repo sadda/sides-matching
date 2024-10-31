@@ -4,7 +4,7 @@ import pandas as pd
 import timm
 from sklearn.metrics.pairwise import cosine_similarity
 import torchvision.transforms as T
-from wildlife_tools.data import WildlifeDataset
+from wildlife_datasets.datasets import WildlifeDataset
 from wildlife_tools.features import DeepFeatures
 from typing import Optional, List, Tuple, Callable
 
@@ -103,7 +103,6 @@ def compute_predictions(
         # Find the closest matches (k highest values)
         idx_pred[chunk,:] = (-similarity).argsort(axis=-1)[:, :k]
         scores[chunk,:] = np.take_along_axis(similarity, idx_pred[chunk,:], axis=-1)
-        #scores[chunk,:] = similarity[:, ]
     if return_score:
         return idx_true, idx_pred, scores
     else:
@@ -167,7 +166,8 @@ def get_dataset(dataset_class, root_dataset):
             d.df['year'] = d.df['date']
     else:
         d.df['date'] = np.nan
-        d.df['year'] = np.nan
+        if 'year' not in d.df.columns:
+            d.df['year'] = np.nan
     return d
 
 def get_df_split(dataset_class, root_dataset, analysis, **kwargs):
