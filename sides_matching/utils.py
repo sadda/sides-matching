@@ -101,31 +101,6 @@ def compute_predictions(
     else:
         return idx_true, idx_pred
 
-def get_dataset(dataset_class, root_dataset):
-    d = dataset_class(root_dataset)
-    if 'date' in d.df.columns:
-        date = d.df['date']
-        idx = d.df.index[~date.isnull()]
-        if len(idx) > 0 and len(str(date.iloc[idx[0]])) != 4:
-            d.df['year'] = np.nan
-            d.df.loc[idx, 'year'] = pd.to_datetime(d.df.loc[idx, 'date']).apply(lambda x: x.year)
-        else:
-            d.df['year'] = d.df['date']
-    else:
-        d.df['date'] = np.nan
-        if 'year' not in d.df.columns:
-            d.df['year'] = np.nan
-    return d
-
-def get_df_split(dataset_class, root_dataset, analysis, **kwargs):
-    d = get_dataset(dataset_class, root_dataset)
-    idx_unknown_side = d.df['orientation'].apply(lambda x: x not in analysis.sides.keys())
-    idx_unknown_identity = d.df['identity'] == 'unknown'
-    idx_ignore = (idx_unknown_side + idx_unknown_identity).to_numpy()
-    idx_database, idx_query = analysis.get_split(d.df, idx_ignore=idx_ignore, **kwargs)
-
-    return d.df, idx_database, idx_query
-
 def unique_no_sort(array):
     return pd.Series(array).unique()
 
