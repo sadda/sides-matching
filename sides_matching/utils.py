@@ -101,52 +101,6 @@ def compute_predictions(
     else:
         return idx_true, idx_pred
 
-def compute_predictions_disjoint(
-        features: np.ndarray,
-        ignore: Optional[List[List[int]]] = None,
-        **kwargs
-        ) -> Tuple[np.ndarray, np.ndarray]:
-    """Computes the closest matches for the disjoint-set setting.
-
-    Args:
-        features (np.ndarray): List of database=query features of size n*n_feature. 
-        ignore (Optional[List[List[int]]], optional): `ignore[i]` is a list of indices
-            in the database ignores for i-th query.
-
-    Returns:
-        Vector of size (n_query,) and array of size (n_query,k). The latter are indices
-            in the database for the closest matches (with ignored `ignore` indices)
-    """
-
-    # If ignore is not provided, initialize as empty
-    if ignore is None:
-        ignore = [[] for _ in range(len(features))]
-    # Add diagonal elements to ignore
-    for i in range(len(ignore)):
-        ignore[i].append(i)
-    return compute_predictions(features, features, ignore=ignore, **kwargs)
-
-def compute_predictions_closed(
-        features_query: np.ndarray,
-        features_database: np.ndarray,
-        ignore: Optional[List[List[int]]] = None,
-        **kwargs
-        ) -> Tuple[np.ndarray, np.ndarray]:
-    """Computes the closest matches for the closed-set setting.
-
-    Args:
-        features_query (np.ndarray): Query features of size n_query*n_feature. 
-        features_database (np.ndarray): Database features of size n_database*n_feature
-        ignore (Optional[List[List[int]]], optional): `ignore[i]` is a list of indices
-            in the database ignores for i-th query.
-
-    Returns:
-        Vector of size (n_query,) and array of size (n_query,k). The latter are indices
-            in the database for the closest matches (with ignored `ignore` indices)
-    """
-
-    return compute_predictions(features_query, features_database, ignore=ignore, **kwargs)
-
 def get_dataset(dataset_class, root_dataset):
     d = dataset_class(root_dataset)
     if 'date' in d.df.columns:
