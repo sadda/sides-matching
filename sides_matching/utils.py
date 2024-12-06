@@ -62,7 +62,6 @@ def compute_predictions(
         ignore: Optional[List[List[int]]] = None,
         matcher: Callable = cosine_similarity,
         k: int = 4,
-        batch_size: int = 1000,
         return_score: bool = False
         ) -> Tuple[np.ndarray, np.ndarray]:
     """Computes a closest match in the database for each vector in the query set.
@@ -74,7 +73,6 @@ def compute_predictions(
             in the database ignores for i-th query.
         matcher (Callable, optional): function computing similarity.
         k (int, optional): Returned number of predictions.
-        batch_size (int, optional): Size of the computaiton batch.
         return_score (bool, optional): Whether the similalarity is returned.
 
     Returns:
@@ -85,8 +83,6 @@ def compute_predictions(
 
     # Create batch chunks
     n_query = len(features_query)
-    n_chunks = int(np.ceil(n_query / batch_size))
-    chunks = np.array_split(range(n_query), n_chunks)
     # If ignore is not provided, initialize as empty
     if ignore is None:
         ignore = [[] for _ in range(n_query)]
@@ -94,16 +90,15 @@ def compute_predictions(
     idx_true = np.array(range(n_query))
     idx_pred = np.zeros((n_query, k), dtype=np.int32)
     scores = np.zeros((n_query, k))
-    for chunk in chunks:
-        # Compute the cosine similarity between the query chunk and the database
-        similarity = matcher(features_query[chunk], features_database)
-        # Set -infinity for ignored indices
-        for i in range(len(chunk)):
-            similarity[i, ignore[chunk[i]]] = -np.inf
-        # Find the closest matches (k highest values)
-        idx_pred[chunk,:] = (-similarity).argsort(axis=-1)[:, :k]
-        scores[chunk,:] = np.take_along_axis(similarity, idx_pred[chunk,:], axis=-1)
+    # Compute the cosine similarity between the query and the database
+    similarity = matcher(features_query, features_database)
+    # Set -infinity for ignored indices
+    for i in range(len(ignore)):
+        similarity[i, ignore[i]] = -np.inf
+    # Find the closest matches (k highest values)
+    idx_pred = (-similarity).argsort(axis=-1)[:, :k]
     if return_score:
+        scores = np.take_along_axis(similarity, idx_pred, axis=-1)
         return idx_true, idx_pred, scores
     else:
         return idx_true, idx_pred
