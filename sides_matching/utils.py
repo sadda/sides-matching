@@ -1,6 +1,7 @@
 import os
 import numpy as np
 import pandas as pd
+import pickle
 import timm
 from sklearn.metrics.pairwise import cosine_similarity
 import torchvision.transforms as T
@@ -14,7 +15,7 @@ def get_normalized_features(
         extractor: Optional[DeepFeatures] = None,
         normalize: bool = True,
         force_compute: bool = False,
-        ) -> np.ndarray:
+        ) -> object:
     """Loads already computed features from `file_name` or computes and saves them.
 
     Args:
@@ -29,12 +30,14 @@ def get_normalized_features(
     """
 
     if os.path.exists(file_name) and not force_compute:
-        features = np.load(file_name)
+        with open(file_name, 'rb') as file: 
+            features = pickle.load(file)
     else:
         features = extractor(dataset)
         if not os.path.exists(os.path.dirname(file_name)):
             os.makedirs(os.path.dirname(file_name))
-        np.save(file_name, features)
+        with open(file_name, 'wb') as file: 
+            pickle.dump(features, file) 
     if normalize:
         for i in range(len(features)):
             features[i] /= np.linalg.norm(features[i])
