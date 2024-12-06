@@ -9,11 +9,10 @@ from wildlife_datasets.datasets import WildlifeDataset
 from wildlife_tools.features import DeepFeatures
 from typing import Optional, List, Tuple, Callable
 
-def get_normalized_features(
+def get_features(
         file_name: str,
         dataset: Optional[WildlifeDataset] = None,
         extractor: Optional[DeepFeatures] = None,
-        normalize: bool = True,
         force_compute: bool = False,
         ) -> object:
     """Loads already computed features from `file_name` or computes and saves them.
@@ -22,7 +21,6 @@ def get_normalized_features(
         file_name (str): Filename of the saved features.
         dataset (Optional[WildlifeDataset], optional): Dataset for which compute the features.
         extractor (Optional[DeepFeatures], optional): Extractor to extract the features.
-        normalize (bool, optional): Whether the features should be normalized to l2-norm one.
         force_compute (bool, optional): Whether the file should be overwritten if it exists.
 
     Returns:
@@ -38,9 +36,6 @@ def get_normalized_features(
             os.makedirs(os.path.dirname(file_name))
         with open(file_name, 'wb') as file: 
             pickle.dump(features, file) 
-    if normalize:
-        for i in range(len(features)):
-            features[i] /= np.linalg.norm(features[i])
     return features
 
 def get_extractor(

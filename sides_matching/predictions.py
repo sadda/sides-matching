@@ -4,7 +4,7 @@ from scipy.spatial.distance import cdist
 from sklearn.metrics.pairwise import cosine_similarity
 
 from sift_matching import Reader, Loader, SIFT, L1Matcher
-from .utils import get_normalized_features, compute_predictions, unique_no_sort
+from .utils import get_features, compute_predictions, unique_no_sort
 
 class Data():
     def compute_scores(self, idx_true):
@@ -24,8 +24,8 @@ class Data_MegaDescriptor(Data):
         self.matcher = cosine_similarity
 
     def get_features(self):
-        features_database = get_normalized_features(self.path_features_database)
-        features_query = get_normalized_features(self.path_features_query)
+        features_database = get_features(self.path_features_database)
+        features_query = get_features(self.path_features_query)
         return features_database, features_query
 
 class Data_TORSOOI(Data):
