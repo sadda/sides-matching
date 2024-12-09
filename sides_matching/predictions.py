@@ -1,32 +1,25 @@
 import os
 import numpy as np
 from scipy.spatial.distance import cdist
-from sklearn.metrics.pairwise import cosine_similarity
+from wildlife_tools.similarity import CosineSimilarity
 
 from sift_matching import Reader, Loader, SIFT, L1Matcher
 from .utils import get_features, compute_predictions, unique_no_sort
 
 class Data():
-    def compute_scores(self, idx_true):
-        features_database, features_query = self.get_features()
-        idx_ignore = [[i] for i in range(len(idx_true))]
-        k = len(idx_true) - 1
-
-        # Get the prediction metric
-        _, idx_pred, scores = compute_predictions(features_query[idx_true], features_database[idx_true], ignore=idx_ignore, k=k, matcher=self.matcher, return_score=True)
-        idx_pred = idx_true[idx_pred]
-        return idx_true, idx_pred, scores
+    def compute_scores(self):
+        features = self.get_features()
+        idx_ignore = [[i] for i in range(len(features))]
+        k = len(features) - 1
+        return compute_predictions(features, features, ignore=idx_ignore, k=k, matcher=self.matcher, return_score=True)
 
 class Data_MegaDescriptor(Data):
-    def __init__(self, path_features_query, path_features_database):
-        self.path_features_query = path_features_query
-        self.path_features_database = path_features_database
-        self.matcher = cosine_similarity
+    def __init__(self, path_features):
+        self.path_features = path_features
+        self.matcher = CosineSimilarity()
 
     def get_features(self):
-        features_database = get_features(self.path_features_database)
-        features_query = get_features(self.path_features_query)
-        return features_database, features_query
+        return get_features(self.path_features)
 
 class Data_TORSOOI(Data):
     def __init__(self, df):
@@ -34,9 +27,7 @@ class Data_TORSOOI(Data):
         self.matcher = lambda x, y: cdist(x, y, lambda a, b: sum(a==b))
 
     def get_features(self):
-        features_database = np.array([list(x) for x in self.df['id_code'].to_numpy()])
-        features_query = np.array([list(x) for x in self.df['id_code'].to_numpy()])
-        return features_database, features_query    
+        return np.array([list(x) for x in self.df['id_code'].to_numpy()])
 
 class Data_SIFT():
     def __init__(
@@ -71,7 +62,7 @@ class Data_SIFT():
         self.keypoint_matcher = keypoint_matcher
         self.reader = reader        
 
-    def compute_scores(self, idx_true, n_matches=15):
+    def compute_scores(self, n_matches=15):
         if self.reader.n_batches != 1:
             raise Exception('Works only for readers with one batch.')
         
@@ -79,18 +70,17 @@ class Data_SIFT():
         self.reader.create_matches()
         matches = self.reader.load_matches(0, 0)
 
-        n = len(idx_true)
+        n = len(matches)
         scores = np.full((n, n), -np.inf)
-        for i0, i in enumerate(idx_true):
-            for j0, j in enumerate(idx_true):
+        for i in range(n):
+            for j in range(n):
                 if i < j and len(matches[i][j]) >= n_matches:
                     value = -np.sum([np.sqrt(match.distance) for match in matches[i][j][:n_matches]])
-                    scores[i0,j0] = value
-                    scores[j0,i0] = value
+                    scores[i,j] = value
+                    scores[j,i] = value
         idx_pred = np.argsort(scores, axis=1)[:,::-1][:,:-1]
         scores = np.array([s[i] for s, i in zip(scores, idx_pred)])
-        idx_pred = idx_true[idx_pred]
-        return idx_true, idx_pred, scores
+        return np.array(range(n)), idx_pred, scores
 
 class Prediction():
     def __init__(self, df, true, pred, scores, n_individuals):
