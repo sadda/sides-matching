@@ -14,29 +14,27 @@ class Data():
         k = len(features) - 1
         return compute_predictions(features, features, ignore=idx_ignore, k=k, matcher=self.matcher, return_score=True)
 
-class MegaDescriptor(Data):
+class Data_WildlifeTools(Data):
     def __init__(self, path_features):
         self.path_features = path_features
+
+    def get_features(self):
+        return get_features(self.path_features)
+
+class MegaDescriptor(Data_WildlifeTools):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.matcher = CosineSimilarity()
 
-    def get_features(self):
-        return get_features(self.path_features)
-
-class Aliked(Data):
-    def __init__(self, path_features):
-        self.path_features = path_features
+class Aliked(Data_WildlifeTools):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.matcher = MatchLightGlue('aliked')
 
-    def get_features(self):
-        return get_features(self.path_features)
-
-class Sift(Data):
-    def __init__(self, path_features):
-        self.path_features = path_features
+class Sift(Data_WildlifeTools):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.matcher = MatchLightGlue('sift')
-
-    def get_features(self):
-        return get_features(self.path_features)
 
 class TORSOOI(Data):
     def __init__(self, df):
