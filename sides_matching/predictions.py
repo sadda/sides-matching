@@ -1,7 +1,8 @@
 import os
 import numpy as np
 from scipy.spatial.distance import cdist
-from wildlife_tools.similarity import CosineSimilarity
+from wildlife_tools.similarity import CosineSimilarity, MatchLightGlue
+from wildlife_tools.features import AlikedExtractor, DiskExtractor, SiftExtractor, SuperPointExtractor
 
 from sift_matching import Reader, Loader, SIFT, L1Matcher
 from .utils import get_features, compute_predictions, unique_no_sort
@@ -13,7 +14,7 @@ class Data():
         k = len(features) - 1
         return compute_predictions(features, features, ignore=idx_ignore, k=k, matcher=self.matcher, return_score=True)
 
-class Data_MegaDescriptor(Data):
+class MegaDescriptor(Data):
     def __init__(self, path_features):
         self.path_features = path_features
         self.matcher = CosineSimilarity()
@@ -21,7 +22,23 @@ class Data_MegaDescriptor(Data):
     def get_features(self):
         return get_features(self.path_features)
 
-class Data_TORSOOI(Data):
+class Aliked(Data):
+    def __init__(self, path_features):
+        self.path_features = path_features
+        self.matcher = MatchLightGlue('aliked')
+
+    def get_features(self):
+        return get_features(self.path_features)
+
+class Sift(Data):
+    def __init__(self, path_features):
+        self.path_features = path_features
+        self.matcher = MatchLightGlue('sift')
+
+    def get_features(self):
+        return get_features(self.path_features)
+
+class TORSOOI(Data):
     def __init__(self, df):
         self.df = df
         self.matcher = lambda x, y: cdist(x, y, lambda a, b: sum(a==b))
