@@ -6,6 +6,13 @@ from wildlife_tools.features import AlikedExtractor, DiskExtractor, SiftExtracto
 from .utils import get_features, compute_predictions, unique_no_sort
 
 class Data():
+    def __init__(self, path_features_query, path_features_database):
+        self.path_features_query = path_features_query
+        self.path_features_database = path_features_database
+
+    def get_features(self):
+        return get_features(self.path_features_query), get_features(self.path_features_database)
+
     def compute_scores(self, ignore_diagonal=False):
         features_query, features_database = self.get_features()
         if ignore_diagonal and len(features_query) == len(features_database):
@@ -16,25 +23,17 @@ class Data():
             k = len(features_database)
         return compute_predictions(features_query, features_database, ignore=idx_ignore, k=k, matcher=self.matcher, return_score=True)
 
-class Data_WildlifeTools(Data):
-    def __init__(self, path_features_query, path_features_database):
-        self.path_features_query = path_features_query
-        self.path_features_database = path_features_database
-
-    def get_features(self):
-        return get_features(self.path_features_query), get_features(self.path_features_database)
-
-class MegaDescriptor(Data_WildlifeTools):
+class MegaDescriptor(Data):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.matcher = CosineSimilarity()
 
-class Aliked(Data_WildlifeTools):
+class Aliked(Data):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.matcher = MatchLightGlue('aliked')
 
-class Sift(Data_WildlifeTools):
+class Sift(Data):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.matcher = MatchLightGlue('sift')
