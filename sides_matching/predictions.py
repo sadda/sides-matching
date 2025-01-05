@@ -3,8 +3,6 @@ import numpy as np
 from scipy.spatial.distance import cdist
 from wildlife_tools.similarity import CosineSimilarity, MatchLightGlue
 from wildlife_tools.features import AlikedExtractor, DiskExtractor, SiftExtractor, SuperPointExtractor
-
-from sift_matching import Reader, Loader, SIFT, L1Matcher
 from .utils import get_features, compute_predictions, unique_no_sort
 
 class Data():
@@ -49,60 +47,6 @@ class TORSOOI(Data):
     def get_features(self):
         features = np.array([list(x) for x in self.df['id_code'].to_numpy()])
         return features, features
-
-class Data_SIFT():
-    def __init__(
-            self,
-            root_images,
-            root_results,
-            df,
-            image_loader=None,
-            keypoint_extractor = None, 
-            keypoint_matcher = None, 
-            reader=None
-            ):
-                
-        df = df.copy()
-        df['path'] = df['path'].apply(lambda x: os.path.join(root_images, x))
-        if image_loader is None:
-            if 'bbox' in df.columns:
-                image_loader = Loader(img_load='bbox', img_size=90)
-            else:
-                image_loader = Loader(img_load='full', img_size=90)
-        if keypoint_extractor is None:
-            keypoint_extractor = SIFT()
-        if keypoint_matcher is None:
-            keypoint_matcher = L1Matcher()
-        if reader is None:
-            reader = Reader(df, image_loader, keypoint_extractor, keypoint_matcher, None, root_results)
-
-        self.df = df
-        self.root_results = root_results
-        self.image_loader = image_loader
-        self.keypoint_extractor = keypoint_extractor
-        self.keypoint_matcher = keypoint_matcher
-        self.reader = reader        
-
-    def compute_scores(self, n_matches=15, ignore_diagonal=False):
-        # TODO: missing ignore_diagonal
-        if self.reader.n_batches != 1:
-            raise Exception('Works only for readers with one batch.')
-        
-        self.reader.create_database()
-        self.reader.create_matches()
-        matches = self.reader.load_matches(0, 0)
-
-        n = len(matches)
-        scores = np.full((n, n), -np.inf)
-        for i in range(n):
-            for j in range(n):
-                if i < j and len(matches[i][j]) >= n_matches:
-                    value = -np.sum([np.sqrt(match.distance) for match in matches[i][j][:n_matches]])
-                    scores[i,j] = value
-                    scores[j,i] = value
-        idx_pred = np.argsort(scores, axis=1)[:,::-1][:,:-1]
-        scores = np.array([s[i] for s, i in zip(scores, idx_pred)])
-        return np.array(range(n)), idx_pred, scores
 
 class Prediction():
     def __init__(self, df, true, pred, scores, n_individuals):
