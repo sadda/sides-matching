@@ -8,18 +8,23 @@ from sift_matching import Reader, Loader, SIFT, L1Matcher
 from .utils import get_features, compute_predictions, unique_no_sort
 
 class Data():
-    def compute_scores(self):
-        features = self.get_features()
-        idx_ignore = [[i] for i in range(len(features))]
-        k = len(features) - 1
-        return compute_predictions(features, features, ignore=idx_ignore, k=k, matcher=self.matcher, return_score=True)
+    def compute_scores(self, ignore_diagonal=False):
+        features_query, features_database = self.get_features()
+        if ignore_diagonal and len(features_query) == len(features_database):
+            idx_ignore = [[i] for i in range(len(features_query))]
+            k = len(features_database) - 1
+        else:
+            idx_ignore = [[] for i in range(len(features_query))]
+            k = len(features_database)
+        return compute_predictions(features_query, features_database, ignore=idx_ignore, k=k, matcher=self.matcher, return_score=True)
 
 class Data_WildlifeTools(Data):
-    def __init__(self, path_features):
-        self.path_features = path_features
+    def __init__(self, path_features_query, path_features_database):
+        self.path_features_query = path_features_query
+        self.path_features_database = path_features_database
 
     def get_features(self):
-        return get_features(self.path_features)
+        return get_features(self.path_features_query), get_features(self.path_features_database)
 
 class MegaDescriptor(Data_WildlifeTools):
     def __init__(self, *args, **kwargs):
@@ -42,7 +47,8 @@ class TORSOOI(Data):
         self.matcher = lambda x, y: cdist(x, y, lambda a, b: sum(a==b))
 
     def get_features(self):
-        return np.array([list(x) for x in self.df['id_code'].to_numpy()])
+        features = np.array([list(x) for x in self.df['id_code'].to_numpy()])
+        return features, features
 
 class Data_SIFT():
     def __init__(
@@ -77,7 +83,8 @@ class Data_SIFT():
         self.keypoint_matcher = keypoint_matcher
         self.reader = reader        
 
-    def compute_scores(self, n_matches=15):
+    def compute_scores(self, n_matches=15, ignore_diagonal=False):
+        # TODO: missing ignore_diagonal
         if self.reader.n_batches != 1:
             raise Exception('Works only for readers with one batch.')
         
