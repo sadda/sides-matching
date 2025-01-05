@@ -38,22 +38,6 @@ def get_features(
             pickle.dump(features, file) 
     return features
 
-def get_extractor(
-        model_name: str = 'hf-hub:BVRA/MegaDescriptor-T-224',
-        **kwargs
-        ) -> DeepFeatures:
-    """Loads an extractor via `timm.create_model`.
-
-    Args:
-        model_name (str, optional): Name of the model.
-
-    Returns:
-        Loaded extractor.
-    """
-
-    model = timm.create_model(model_name, num_classes=0, pretrained=True)
-    return DeepFeatures(model, **kwargs)
-
 def compute_predictions(
         features_query: np.ndarray,
         features_database: np.ndarray,

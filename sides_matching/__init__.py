@@ -3,5 +3,5 @@ from .analysis import Analysis_HyenaID2022, Analysis_LeopardID2022, Analysis_Nya
 from .analysis import Analysis_AmvrakikosTurtles, Analysis_ReunionTurtles, Analysis_ZakynthosTurtles
 from .datasets import amvrakikos, reunion_green, reunion_hawksbill, zakynthos
 from .predictions import MegaDescriptor, TORSOOI, Aliked, Sift, Prediction
-from .utils import get_features, get_extractor, compute_predictions
+from .utils import get_features, compute_predictions
 from .utils import unique_no_sort, get_transform, get_box_plot_data
