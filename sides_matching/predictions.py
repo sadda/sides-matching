@@ -48,7 +48,7 @@ class TORSOOI(Data):
         return features, features
 
 class Prediction():
-    def __init__(self, df, true, pred, scores, n_individuals):
+    def __init__(self, df, true, pred, scores):
         self.df = df
         self.identity = df['identity'].to_numpy()
         self.orientation = df['orientation'].to_numpy()
@@ -56,7 +56,7 @@ class Prediction():
         self.true = true
         self.pred = pred
         self.scores = scores
-        self.n_individuals = n_individuals
+        self.n_individuals = df['identity'].nunique()
     
     def compute_accuracy(self, mods):
         metrics = [f'top {i}' for i in range(1, 1+self.n_individuals)]
