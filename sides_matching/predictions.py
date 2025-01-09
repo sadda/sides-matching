@@ -1,9 +1,7 @@
-import os
 import numpy as np
 from scipy.spatial.distance import cdist
 from wildlife_tools.similarity import CosineSimilarity, MatchLightGlue
-from wildlife_tools.features import AlikedExtractor, DiskExtractor, SiftExtractor, SuperPointExtractor
-from .utils import get_features, compute_predictions, unique_no_sort
+from .utils import get_features, unique_no_sort
 
 class Data():
     def __init__(self, path_features_query, path_features_database):
