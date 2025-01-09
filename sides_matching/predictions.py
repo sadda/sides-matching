@@ -13,15 +13,20 @@ class Data():
     def get_features(self):
         return get_features(self.path_features_query), get_features(self.path_features_database)
 
-    def compute_scores(self, ignore_diagonal=False):
+    def compute_similarity(self, ignore=None):
         features_query, features_database = self.get_features()
-        if ignore_diagonal and len(features_query) == len(features_database):
-            idx_ignore = [[i] for i in range(len(features_query))]
-            k = len(features_database) - 1
-        else:
-            idx_ignore = [[] for i in range(len(features_query))]
-            k = len(features_database)
-        return compute_predictions(features_query, features_database, ignore=idx_ignore, k=k, matcher=self.matcher, return_score=True)
+        # Compute the cosine similarity between the query and the database
+        similarity = self.matcher(features_query, features_database)
+        # Set -infinity for ignored indices
+        if ignore is not None:
+            if ignore == 'diagonal':
+                if len(features_query) == len(features_database):
+                    ignore = [[i] for i in range(len(features_query))]
+                else:
+                    raise Exception('For ignore=diagonal, query and database must correspond')
+            for i in range(len(ignore)):
+                similarity[i, ignore[i]] = -np.inf
+        return similarity
 
 class MegaDescriptor(Data):
     def __init__(self, *args, **kwargs):
@@ -48,16 +53,24 @@ class TORSOOI(Data):
         return features, features
 
 class Prediction():
-    def __init__(self, df, true, pred, scores):
+    def __init__(self, df, similarity, **kwargs):
         self.df = df
         self.identity = df['identity'].to_numpy()
         self.orientation = df['orientation'].to_numpy()
         self.year = df['year'].to_numpy()
-        self.true = true
-        self.pred = pred
-        self.scores = scores
         self.n_individuals = df['identity'].nunique()
-    
+        self.similarity = similarity
+        self.compute_scores(**kwargs)        
+        self.true_label = self.identity[self.true]
+        self.pred_label = self.identity[self.pred]
+
+    def compute_scores(self, k=None):
+        if k is None:
+            k = self.similarity.size[1]
+        self.true = np.array(range(len(self.similarity)))
+        self.pred = (-self.similarity).argsort(axis=-1)[:, :k]
+        self.scores = np.take_along_axis(self.similarity, self.pred, axis=-1)
+
     def compute_accuracy(self, mods):
         metrics = [f'top {i}' for i in range(1, 1+self.n_individuals)]
         accuracy = {mod: {metric: 0 for metric in metrics} for mod in mods}
