@@ -52,6 +52,18 @@ class TORSOOI(Data):
         features = np.array([list(x) for x in self.df['id_code'].to_numpy()])
         return features, features
 
+class Combined():
+    def __init__(self, prediction0, prediction1):
+        if not prediction0.df.equals(prediction1.df):
+            raise Exception('Dataframes are not equal')
+        if prediction0.similarity.size != prediction1.similarity.size:
+            raise Exception('Similarity does not have the same size')
+        self.prediction0 = prediction0
+        self.prediction1 = prediction1
+
+    def compute_similarity(self, **kwargs):
+        return np.maximum(self.prediction0.similarity, self.prediction1.similarity)
+
 class Prediction():
     def __init__(self, df, similarity, **kwargs):
         self.df = df
