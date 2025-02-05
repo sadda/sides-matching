@@ -1,8 +1,10 @@
 import os
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
+import cv2
+from PIL import Image
 import pickle
-import timm
 from sklearn.metrics.pairwise import cosine_similarity
 import torchvision.transforms as T
 from wildlife_datasets.datasets import WildlifeDataset
@@ -111,3 +113,60 @@ def get_box_plot_data(boxplot):
         dict1['upper_whisker'] = boxplot['whiskers'][(i*2)+1].get_ydata()[1]
         rows_list.append(dict1)
     return pd.DataFrame(rows_list)
+
+def unpack(x):
+    return f'{x[0]}_{x[1]}'
+
+def convert_img_keypoints(img, keypoints, flip_img=False):
+    if flip_img:
+        if isinstance(img, np.ndarray):
+            img = Image.fromarray(img)
+        img = img.transpose(Image.FLIP_LEFT_RIGHT)
+        keypoints = [cv2.KeyPoint(img.size[0] - int(x[0]), int(x[1]), 1) for x in keypoints]
+    else:
+        keypoints = [cv2.KeyPoint(int(x[0]), int(x[1]), 1) for x in keypoints]
+    return np.array(img), keypoints
+
+def visualise_matches(
+        img0: Image,
+        keypoints0: np.ndarray,
+        img1: Image,
+        keypoints1: list,
+        ax = None,
+        flip_img0 = False,
+        flip_img1 = False
+        ):
+    """
+    Visualise matches between two images.
+
+    Args:
+        img0 (np.array or PIL Image): First image.
+        keypoints0 (np.array): Keypoints in the first image.
+        img1 (np.array): Second image.
+        keypoints1 (np.array): Keypoints in the second image.
+        ax (matplotlib.axes.Axes, optional): Matplotlib axis to draw on. If None, a new axis is created.
+    """
+
+    # Convert images and keypoints to desired format
+    img0, keypoints0 = convert_img_keypoints(img0, keypoints0, flip_img=flip_img0)
+    img1, keypoints1 = convert_img_keypoints(img1, keypoints1, flip_img=flip_img1)
+
+    # Create dummy matches (DMatch objects)
+    matches = [cv2.DMatch(i, i, 0) for i in range(len(keypoints0))]
+
+    # Draw matches
+    img_matches = cv2.drawMatches(
+        img0,
+        keypoints0,
+        img1,
+        keypoints1,
+        matches,
+        None,
+        flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS,
+    )
+
+    # Plotting
+    if ax is None:
+        _, ax = plt.subplots()
+    ax.imshow(img_matches)
+    ax.axis("off")
