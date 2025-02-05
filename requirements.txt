@@ -1,5 +1,5 @@
 ipykernel
 scikit-image
-timm==0.9.16
+timm
 wildlife-datasets @ git+https://github.com/WildlifeDatasets/wildlife-datasets@develop
-wildlife-tools>=0.0.9
+wildlife-tools @ git+https://github.com/WildlifeDatasets/wildlife-tools
