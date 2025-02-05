@@ -8,7 +8,7 @@ Our results imply that it is possible to do so even for opposite profiles
 
 ![](resources/matches_opposite.png)
 
-The main conclusion of this observation is that biologists should used both profiles for identifying individuals and not only the same profile as the current practise goes. 
+The main conclusion of the paper is that, when trying to match a photo of sea turtle of a given profile, researchers should use photos of both sea turtle profiles (both left and right) as a search database and not only photos of the same profile as it have been done so far.
 
 ## Installation
 
