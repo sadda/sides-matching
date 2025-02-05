@@ -1,4 +1,14 @@
-This repository generates results for our paper, where we analyzed the differences between left and right profiles for sea turtles. We analyzed three different species (loggerheads, greens and hawksbills) with the uniform conclusion is that there is a significant similarity between opposite profile in all three species. The main conclusion of this observation is that biologists should used both profiles for identifying individuals and not only the same profile as the current practise goes.
+# Similarity of opposite sea turtle profiles
+
+This repository generates results for our paper [Exploiting facial side similarities to improve AI-driven sea turtle photo-identification systems](https://biorxiv.org/cgi/content/short/2024.09.13.612839). We analyzed three different species (loggerheads, greens and hawksbills) with the uniform conclusion is that there is a significant similarity between opposite profile in all three species. The current common practice among biologist is to identify sea turtles based on the same profiles.
+
+![](resources/matches_same.png)
+
+Our results imply that it is possible to do so even for opposite profiles
+
+![](resources/matches_opposite.png)
+
+The main conclusion of this observation is that biologists should used both profiles for identifying individuals and not only the same profile as the current practise goes. 
 
 ## Installation
 
